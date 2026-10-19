@@ -11,7 +11,12 @@ import ForgotPasswordPage from '@pages/Auth/ForgotPasswordPage'
 
 // App Pages
 import DashboardPage from '@pages/Dashboard/DashboardPage'
+import OverviewPage from '@pages/Overview/OverviewPage'
 import EmployeesPage from '@pages/Employees/EmployeesPage'
+import AddEmployeePage from '@pages/Employees/AddEmployeePage'
+import EmployeeProfilePage from '@pages/Employees/EmployeeProfilePage'
+import BranchesPage from '@pages/Branches/BranchesPage'
+import DocumentsPage from '@pages/Documents/DocumentsPage'
 import AttendancePage from '@pages/Attendance/AttendancePage'
 import LeavePage from '@pages/Leave/LeavePage'
 import TasksPage from '@pages/Tasks/TasksPage'
@@ -71,7 +76,12 @@ export default function AppRouter() {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard"    element={<DashboardPage />} />
+        <Route path="overview"     element={<OverviewPage />} />
         <Route path="employees"    element={<EmployeesPage />} />
+        <Route path="employees/new"          element={<AddEmployeePage />} />
+        <Route path="employees/:employeeId"  element={<EmployeeProfilePage />} />
+        <Route path="branches"     element={<BranchesPage />} />
+        <Route path="documents"    element={<DocumentsPage />} />
         <Route path="attendance"   element={<AttendancePage />} />
         <Route path="leave"        element={<LeavePage />} />
         <Route path="tasks"        element={<TasksPage />} />

@@ -82,9 +82,10 @@ export const NAV_SECTIONS = [
     id: 'people',
     label: 'PEOPLE',
     items: [
+      { id: 'people-overview', label: 'People overview', path: '/overview', icon: 'users' },
       { id: 'employees', label: 'Employees', path: '/employees', icon: 'users' },
-      { id: 'branches', label: 'Branches & departments', icon: 'building' },
-      { id: 'documents', label: 'Documents & contracts', icon: 'file' },
+      { id: 'branches', label: 'Branches & departments', path: '/branches', icon: 'building' },
+      { id: 'documents', label: 'Documents & contracts', path: '/documents', icon: 'file' },
     ],
   },
   {
