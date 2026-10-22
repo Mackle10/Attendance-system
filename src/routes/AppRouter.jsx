@@ -35,6 +35,21 @@ function ProtectedRoute({ children }) {
   return isAuthenticated ? children : <Navigate to="/login" replace />
 }
 
+function AdminRoute({ children }) {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) return null;
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user.role !== 'admin') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+}
 /**
  * PublicRoute – redirects authenticated users away from auth pages
  */
@@ -77,17 +92,17 @@ export default function AppRouter() {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard"    element={<DashboardPage />} />
         <Route path="overview"     element={<OverviewPage />} />
-        <Route path="employees"    element={<EmployeesPage />} />
+        <Route path="employees" element={ <AdminRoute> <EmployeesPage /> </AdminRoute> } />
         <Route path="employees/new"          element={<AddEmployeePage />} />
         <Route path="employees/:employeeId"  element={<EmployeeProfilePage />} />
-        <Route path="branches"     element={<BranchesPage />} />
+        <Route path="branches" element={ <AdminRoute> <BranchesPage /> </AdminRoute> } />
         <Route path="documents"    element={<DocumentsPage />} />
         <Route path="attendance"   element={<AttendancePage />} />
         <Route path="leave"        element={<LeavePage />} />
         <Route path="tasks"        element={<TasksPage />} />
         <Route path="performance"  element={<PerformancePage />} />
-        <Route path="payroll"      element={<PayrollPage />} />
-        <Route path="reports"    element={<ReportsPage />} />
+        <Route path="payroll" element={ <AdminRoute> <PayrollPage /> </AdminRoute> } />
+        <Route path="reports" element={ <AdminRoute> <ReportsPage /> </AdminRoute> } />
         <Route path="settings"   element={<SettingsPage />} />
       </Route>
 

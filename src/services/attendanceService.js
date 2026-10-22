@@ -1,14 +1,24 @@
-/**
- * attendanceService.js
- * Attendance tracking API calls.
- */
-import api from './api'
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+} from 'firebase/firestore';
+import { db } from '@services/firebase';
 
 export const attendanceService = {
-  // getDaily:    (date)       => api.get('/attendance', { params: { date } }),
-  // getByEmployee: (id, params) => api.get(`/attendance/employee/${id}`, { params }),
-  // clockIn:     (data)       => api.post('/attendance/clock-in', data),
-  // clockOut:    (data)       => api.post('/attendance/clock-out', data),
-  // getCalendar: (params)     => api.get('/attendance/calendar', { params }),
-  // correct:     (id, data)   => api.put(`/attendance/${id}/correct`, data),
-}
+  async getDaily(date) {
+    const attendanceRef = collection(db, 'attendance');
+    const dailyQuery = query(
+      attendanceRef,
+      where('date', '==', date),
+    );
+
+    const snapshot = await getDocs(dailyQuery);
+
+    return snapshot.docs.map((document) => ({
+      id: document.id,
+      ...document.data(),
+    }));
+  },
+};

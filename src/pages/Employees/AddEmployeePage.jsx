@@ -7,7 +7,8 @@ import { useNavigate } from 'react-router-dom'
 import StepTracker from '@components/StepTracker'
 import JobPlacementForm from '@components/JobPlacementForm'
 import SummaryCard from '@components/SummaryCard'
-import { employees } from '@components/EmployeesList'
+import { employeeService } from '@services/employeeService';
+
 
 const stepTitles = [
   'Personal details',
@@ -79,22 +80,76 @@ export default function AddEmployeePage() {
 
   const updateForm = (key, value) => setFormData(previous => ({ ...previous, [key]: value }))
 
-  const handleSave = (isDraft = false) => {
-    const generatedId = `NF-${String(Math.floor(Math.random() * 9000) + 1000)}`
-    setEmployeeId(generatedId)
-    setSaveMessage(isDraft ? 'Draft saved locally.' : `Employee saved locally. ID: ${generatedId}`)
-    localStorage.setItem(
-      FORM_STORAGE_KEY,
-      JSON.stringify({ ...formData, documents: documents.map(file => file.name), isDraft })
-    )
-  }
+  const handleSave = async (isDraft = false) => {
+try {
+setSaveMessage('');
+
+
+// Keep drafts in local storage.
+if (isDraft) {
+  localStorage.setItem(
+    FORM_STORAGE_KEY,
+    JSON.stringify({
+      ...formData,
+      documents: documents.map((file) => file.name),
+      isDraft: true,
+    })
+  );
+
+  setSaveMessage('Draft saved locally.');
+  return;
+}
+
+// Prepare the employee record for Firebase.
+const employeeData = {
+employeeNumber: `EMP-${Date.now()}`,
+fullName: formData.fullName,
+email: formData.email,
+phone: formData.phone,
+position: formData.jobPosition,
+department: formData.department,
+branch: formData.branch,
+type: formData.employmentType,
+status: 'Active',
+startDate: formData.startDate,
+appRole: formData.appRole,
+salary: formData.salary,
+paymentFrequency: formData.paymentFrequency,
+shift: formData.shift,
+clockInMethods: formData.clockInMethods,
+documents: documents.map((file) => file.name),
+};
+
+// Save the employee to Firestore.
+const savedEmployee = await employeeService.create(employeeData);
+
+setEmployeeId(savedEmployee.employeeNumber);
+setSaveMessage(
+  `Employee saved successfully! ID: ${savedEmployee.employeeNumber}`
+);
+
+// Clear the saved draft after a successful save.
+localStorage.removeItem(FORM_STORAGE_KEY);
+
+
+} catch (error) {
+console.error('Failed to save employee:', error);
+setSaveMessage(
+error.code === 'permission-denied'
+? 'Permission denied. Please sign in with an administrator account.'
+: 'Could not save employee. Please try again.'
+);
+}
+};
+
 
   // The prototype paged between its three employee screens with 1/2/3.
   // Those screens are routes now, so map the page numbers onto them.
-  const goToPage = page => {
-    if (page === 2) navigate('/employees')
-    if (page === 3) navigate(`/employees/${employees[3].id}`)
-  }
+  const goToPage = (page) => {
+  if (page === 1) navigate('/employees/new');
+  if (page === 2) navigate('/employees');
+  if (page === 3) navigate('/employees');
+};
 
   const renderStep = () => {
     if (currentStep === 1) {

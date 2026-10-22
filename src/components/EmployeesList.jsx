@@ -1,28 +1,20 @@
-import React, { useState } from 'react';
-import { Search, ChevronDown, Upload, Download, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  Search,
+  ChevronDown,
+  Upload,
+  Download,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
+
+import { employeeService } from '@services/employeeService';
 
 /* ─── Employee data ──────────────────────────────────────── */
-export const employees = [
-  { id: 'NF-0007', initials: 'RN', color: 'bg-blue-500',   name: 'Ruth Nabirye',      phone: '0772 418 903', position: 'HR Manager',           department: 'Human resources', branch: 'Kampala HQ',       type: 'Permanent', started: 'Mar 2019', status: 'Active' },
-  { id: 'NF-0012', initials: 'EA', color: 'bg-teal-500',   name: 'Esther Akello',     phone: '0701 552 110', position: 'Finance Officer',       department: 'Finance',         branch: 'Kampala HQ',       type: 'Permanent', started: 'Jan 2020', status: 'Active' },
-  { id: 'NF-0019', initials: 'DM', color: 'bg-orange-500', name: 'David Mugisha',     phone: '0782 330 471', position: 'Warehouse Supervisor',  department: 'Warehouse',       branch: 'Mukono Warehouse', type: 'Permanent', started: 'Jun 2020', status: 'Active' },
-  { id: 'NF-0044', initials: 'SN', color: 'bg-green-500',  name: 'Sarah Namutebi',   phone: '0756 907 214', position: 'Sales Associate',      department: 'Sales',           branch: 'Ntinda Store',     type: 'Permanent', started: 'Feb 2023', status: 'Active' },
-  { id: 'NF-0051', initials: 'IK', color: 'bg-purple-500', name: 'Ivan Kizza',        phone: '0774 118 620', position: 'Field Sales Rep',      department: 'Sales',           branch: 'Wakiso route',     type: 'Contract',  started: 'Aug 2023', status: 'Active' },
-  { id: 'NF-0058', initials: 'GA', color: 'bg-indigo-500', name: 'Grace Atim',        phone: '0703 845 996', position: 'Store Keeper',         department: 'Warehouse',       branch: 'Mukono Warehouse', type: 'Permanent', started: 'Nov 2023', status: 'Active' },
-  { id: 'NF-0063', initials: 'JO', color: 'bg-red-500',    name: 'Joseph Okello',     phone: '0789 204 337', position: 'Driver',               department: 'Logistics',       branch: 'Entebbe Depot',    type: 'Contract',  started: 'Jan 2024', status: 'Active' },
-  { id: 'NF-0070', initials: 'AN', color: 'bg-sky-500',    name: 'Annet Nakato',      phone: '0752 661 048', position: 'Accounts Assistant',   department: 'Finance',         branch: 'Kampala HQ',       type: 'Permanent', started: 'Apr 2024', status: 'On leave' },
-  { id: 'NF-0091', initials: 'MW', color: 'bg-lime-600',   name: 'Moses Waiswa',      phone: '0776 093 582', position: 'Loader',               department: 'Warehouse',       branch: 'Mukono Warehouse', type: 'Casual',    started: 'Feb 2025', status: 'Active' },
-  { id: 'NF-0104', initials: 'HN', color: 'bg-pink-500',   name: 'Harriet Nansubuga', phone: '0708 377 150', position: 'Cashier',              department: 'Sales',           branch: 'Ntinda Store',     type: 'Permanent', started: 'Jul 2025', status: 'Active' },
-  { id: 'NF-0131', initials: 'FA', color: 'bg-amber-500',  name: 'Fiona Achieng',     phone: '0787 512 739', position: 'Sales Associate',      department: 'Sales',           branch: 'Kampala HQ',       type: 'Contract',  started: 'Aug 2026', status: 'Probation' },
-  { id: 'NF-0138', initials: 'PL', color: 'bg-cyan-600',   name: 'Paul Lubega',       phone: '0759 428 061', position: 'Sales Associate',      department: 'Sales',           branch: 'Ntinda Store',     type: 'Contract',  started: 'Sep 2026', status: 'Probation' },
-];
 
-const tabs = [
-  { label: 'Active',    count: 131 },
-  { label: 'Probation', count: 5   },
-  { label: 'On leave',  count: 7   },
-  { label: 'Exited',    count: 12  },
-];
+
+
 
 function StatusBadge({ status }) {
   if (status === 'Active') {
@@ -59,24 +51,78 @@ export default function EmployeesList({
   onAddEmployee,
   onSelectEmployee,
 }) {
-  const [activeTab, setActiveTab] = useState('Active');
-  const [checked, setChecked] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+const [activeTab, setActiveTab] = useState('Active');
+const [checked, setChecked] = useState([]);
+const [searchQuery, setSearchQuery] = useState('');
+
+const [employees, setEmployees] = useState([]);
+const tabs = [
+  {
+    label: 'Active',
+    count: employees.filter((emp) => (emp.status || 'Active') === 'Active').length,
+  },
+  {
+    label: 'Probation',
+    count: employees.filter((emp) => emp.status === 'Probation').length,
+  },
+  {
+    label: 'On leave',
+    count: employees.filter((emp) => emp.status === 'On leave').length,
+  },
+  {
+    label: 'Exited',
+    count: employees.filter((emp) => emp.status === 'Exited').length,
+  },
+];
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState('');
+
+
+useEffect(() => {
+  async function loadEmployees() {
+    try {
+      setLoading(true);
+      setError('');
+
+      const data = await employeeService.getAll();
+      setEmployees(data);
+    } catch (err) {
+      console.error('Failed to load employees:', err);
+      setError('Could not load employees. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  loadEmployees();
+}, []);
 
   const toggle = (id) =>
     setChecked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
-  const filteredEmployees = employees.filter((emp) => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      emp.name.toLowerCase().includes(q) ||
-      emp.id.toLowerCase().includes(q) ||
-      emp.phone.includes(q) ||
-      emp.position.toLowerCase().includes(q) ||
-      emp.department.toLowerCase().includes(q)
-    );
-  });
+const filteredEmployees = employees.filter((emp) => {
+  const name = emp.fullName || emp.name || '';
+  const employeeNumber = emp.employeeNumber || '';
+  const phone = emp.phone || '';
+  const position = emp.position || '';
+  const department = emp.department || '';
+
+  const matchesSearch = [
+    name,
+    employeeNumber,
+    emp.id,
+    phone,
+    position,
+    department,
+  ].some((value) =>
+    String(value).toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const matchesStatus =
+    activeTab === 'All' || (emp.status || 'Active') === activeTab;
+
+  return matchesSearch && matchesStatus;
+});
 
   return (
     <div className="min-w-0 flex-1 bg-[#f8f7f4]">
@@ -89,7 +135,7 @@ export default function EmployeesList({
               People · <span className="text-slate-700">Employees</span>
             </nav>
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
-              138 people work here
+              {employees.length} {employees.length === 1 ? 'person' : 'people'} work here
             </h1>
           </div>
           <div className="flex flex-wrap items-center gap-2.5">
@@ -191,6 +237,29 @@ export default function EmployeesList({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#f5f2eb]">
+                {loading && (
+  <tr>
+    <td colSpan={9} className="px-5 py-10 text-center text-slate-500">
+      Loading employees...
+    </td>
+  </tr>
+)}
+
+{!loading && error && (
+  <tr>
+    <td colSpan={9} className="px-5 py-10 text-center text-red-600">
+      {error}
+    </td>
+  </tr>
+)}
+
+{!loading && !error && filteredEmployees.length === 0 && (
+  <tr>
+    <td colSpan={9} className="px-5 py-10 text-center text-slate-500">
+      No employees found. Add an employee record to get started.
+    </td>
+  </tr>
+)}
                 {filteredEmployees.map((emp) => (
                   <tr
                     key={emp.id}
@@ -208,22 +277,27 @@ export default function EmployeesList({
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
                         <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#dbeafe] text-[11px] font-bold text-[#1e40af]">
-                          {emp.initials}
+                          {(emp.fullName || emp.name || 'U')
+  .split(' ')
+  .map((part) => part[0])
+  .join('')
+  .slice(0, 2)
+  .toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-semibold text-slate-900">{emp.name}</p>
+                          <p className="font-semibold text-slate-900">{emp.fullName || emp.name || 'Unnamed employee'}</p>
                           <p className="text-[11px] text-slate-400">{emp.phone}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5 font-mono text-xs font-semibold text-slate-600">{emp.id}</td>
-                    <td className="px-4 py-3.5 text-slate-800 font-medium">{emp.position}</td>
-                    <td className="px-4 py-3.5 text-slate-600">{emp.department}</td>
-                    <td className="px-4 py-3.5 text-slate-600">{emp.branch}</td>
-                    <td className="px-4 py-3.5 text-slate-600">{emp.type}</td>
-                    <td className="px-4 py-3.5 text-slate-500 font-medium">{emp.started}</td>
+                    <td className="px-4 py-3.5 font-mono text-xs font-semibold text-slate-600">{emp.employeeNumber || emp.id}</td>
+                    <td className="px-4 py-3.5 text-slate-800 font-medium">{emp.position || '-'}</td>
+                    <td className="px-4 py-3.5 text-slate-600">{emp.department || '-'}</td>
+                    <td className="px-4 py-3.5 text-slate-600">{emp.branch || '-'}</td>
+                    <td className="px-4 py-3.5 text-slate-600">{emp.type || '-'}</td>
+                    <td className="px-4 py-3.5 text-slate-500 font-medium">{emp.started || emp.startDate || '-'}</td>
                     <td className="px-5 py-3.5">
-                      <StatusBadge status={emp.status} />
+                      <StatusBadge status={emp.status || 'Active'} />
                     </td>
                   </tr>
                 ))}

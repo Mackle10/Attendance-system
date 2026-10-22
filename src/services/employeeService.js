@@ -1,15 +1,59 @@
-/**
- * employeeService.js
- * CRUD operations for employee records.
- * TODO: Uncomment and connect to real backend endpoints.
- */
-import api from './api'
+import {
+collection,
+getDocs,
+doc,
+getDoc,
+addDoc,
+serverTimestamp,
+} from 'firebase/firestore';
+
+import { db } from '@services/firebase';
 
 export const employeeService = {
-  // getAll:    (params) => api.get('/employees', { params }),
-  // getById:   (id)     => api.get(`/employees/${id}`),
-  // create:    (data)   => api.post('/employees', data),
-  // update:    (id, data) => api.put(`/employees/${id}`, data),
-  // delete:    (id)     => api.delete(`/employees/${id}`),
-  // uploadAvatar: (id, formData) => api.post(`/employees/${id}/avatar`, formData),
+// Retrieve all employees
+async getAll() {
+const snapshot = await getDocs(collection(db, 'employees'));
+
+```
+return snapshot.docs.map((document) => ({
+  id: document.id,
+  ...document.data(),
+}));
+```
+
+},
+
+// Retrieve one employee
+async getById(employeeId) {
+const employeeRef = doc(db, 'employees', employeeId);
+const snapshot = await getDoc(employeeRef);
+
+```
+if (!snapshot.exists()) {
+  return null;
 }
+
+return {
+  id: snapshot.id,
+  ...snapshot.data(),
+};
+```
+
+},
+
+// Create a new employee
+async create(employeeData) {
+const employeeRef = await addDoc(collection(db, 'employees'), {
+...employeeData,
+createdAt: serverTimestamp(),
+});
+
+```
+return {
+  id: employeeRef.id,
+  ...employeeData,
+};
+```
+
+},
+};
