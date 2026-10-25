@@ -10,7 +10,6 @@ import RegisterPage from '@pages/Auth/RegisterPage'
 import ForgotPasswordPage from '@pages/Auth/ForgotPasswordPage'
 
 // App Pages
-import DashboardPage from '@pages/Dashboard/DashboardPage'
 import OverviewPage from '@pages/Overview/OverviewPage'
 import EmployeesPage from '@pages/Employees/EmployeesPage'
 import AddEmployeePage from '@pages/Employees/AddEmployeePage'

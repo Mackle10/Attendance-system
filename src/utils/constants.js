@@ -72,60 +72,50 @@ export const PAYROLL_PERIOD = {
 
 // ── Navigation (matches product screenshots) ─────────────────────────────────
 export const NAV_SECTIONS = [
-  {
-    id: 'main',
-    items: [
-      { id: 'overview', label: 'Overview', path: '/dashboard', icon: 'overview' },
-    ],
-  },
-  {
-    id: 'people',
-    label: 'PEOPLE',
-    items: [
-      { id: 'people-overview', label: 'People overview', path: '/overview', icon: 'users' },
-      { id: 'employees', label: 'Employees', path: '/employees', icon: 'users' },
-      { id: 'branches', label: 'Branches & departments', path: '/branches', icon: 'building' },
-      { id: 'documents', label: 'Documents & contracts', path: '/documents', icon: 'file' },
-    ],
-  },
-  {
-    id: 'time',
-    label: 'TIME',
-    items: [
-      { id: 'attendance', label: 'Attendance', path: '/attendance', icon: 'clock' },
-      { id: 'schedules', label: 'Schedules & shifts', icon: 'schedule' },
-      { id: 'leave', label: 'Leave', path: '/leave', icon: 'calendar', badge: 3 },
-    ],
-  },
-  {
-    id: 'work',
-    label: 'WORK',
-    items: [
-      { id: 'tasks', label: 'Tasks', path: '/tasks', icon: 'tasks' },
-      { id: 'performance', label: 'Performance', path: '/performance', icon: 'trend' },
-    ],
-  },
-  {
-    id: 'money',
-    label: 'MONEY',
-    items: [
-      { id: 'payroll', label: 'Payroll', path: '/payroll', icon: 'payroll' },
-      { id: 'expenses', label: 'Expenses', icon: 'wallet', badge: 2 },
-    ],
-  },
-  {
-    id: 'company',
-    label: 'COMPANY',
-    items: [
-      { id: 'notifications', label: 'Notifications', icon: 'bell' },
-      { id: 'reports', label: 'Reports', path: '/reports', icon: 'chart' },
-      { id: 'audit', label: 'Audit trail', icon: 'list' },
-      { id: 'settings', label: 'Settings', path: '/settings', icon: 'settings' },
-    ],
-  },
-]
+{
+id: 'main',
+items: [
+{ id: 'overview', label: 'Overview', path: '/dashboard', icon: 'overview' },
+],
+},
+{
+id: 'people',
+label: 'PEOPLE',
+items: [
+{ id: 'employees', label: 'Employees', path: '/employees', icon: 'users' },
+{ id: 'branches', label: 'Branches & departments', path: '/branches', icon: 'building' },
+{ id: 'documents', label: 'Documents & contracts', path: '/documents', icon: 'file' },
+],
+},
+{
+id: 'time',
+label: 'TIME & ATTENDANCE',
+items: [
+{ id: 'attendance', label: 'Attendance', path: '/attendance', icon: 'clock' },
+{ id: 'schedules', label: 'Schedules & shifts', icon: 'schedule' },
+{ id: 'leave', label: 'Leave', path: '/leave', icon: 'calendar', badge: 3 },
+],
+},
+{
+id: 'development',
+label: 'EMPLOYEE DEVELOPMENT',
+items: [
+{ id: 'performance', label: 'Performance', path: '/performance', icon: 'trend' },
+],
+},
+{
+id: 'administration',
+label: 'ADMINISTRATION',
+items: [
+{ id: 'notifications', label: 'Notifications', icon: 'bell' },
+{ id: 'reports', label: 'Reports', path: '/reports', icon: 'chart' },
+{ id: 'settings', label: 'Settings', path: '/settings', icon: 'settings' },
+],
+},
+];
 
-export const NAV_ITEMS = NAV_SECTIONS.flatMap(section => section.items)
+export const NAV_ITEMS = NAV_SECTIONS.flatMap(section => section.items);
+
 
 // ── Pagination ───────────────────────────────────────────────────────────────
 export const DEFAULT_PAGE_SIZE   = 20

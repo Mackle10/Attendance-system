@@ -1,68 +1,65 @@
 import React, { useState } from 'react';
 import {
-  BarChart3,
-  Bell,
-  Building2,
-  Calendar,
-  CheckSquare,
-  ChevronDown,
-  Clock,
-  DollarSign,
-  FileText,
-  LayoutDashboard,
-  LogOut,
-  Menu,
-  Settings,
-  Shield,
-  Users,
-  X,
+BarChart3,
+Bell,
+Building2,
+Calendar,
+ChevronDown,
+Clock,
+DollarSign,
+FileText,
+LayoutDashboard,
+LogOut,
+Menu,
+Settings,
+Shield,
+Users,
+X,
 } from 'lucide-react';
 import Logo from './Logo.jsx';
 
 const sections = [
-  {
-    title: 'Overview',
-    items: [{ label: 'Overview', view: 'overview', icon: LayoutDashboard }],
-  },
-  {
-    title: 'People',
-    items: [
-      { label: 'Employees', view: 'employees', icon: Users },
-      { label: 'Branches & departments', view: 'branches', icon: Building2 },
-      { label: 'Documents & contracts', view: 'documents', icon: FileText },
-    ],
-  },
-  {
-    title: 'Time',
-    items: [
-      { label: 'Attendance', view: 'attendance', icon: Clock },
-      { label: 'Schedules & shifts', view: 'schedules', icon: Calendar },
-      { label: 'Leave', view: 'leave', icon: Calendar, badge: '3' },
-    ],
-  },
-  {
-    title: 'Work',
-    items: [
-      { label: 'Tasks', view: 'tasks', icon: CheckSquare },
-      { label: 'Performance', view: 'performance', icon: BarChart3 },
-    ],
-  },
-  {
-    title: 'Money',
-    items: [
-      { label: 'Payroll', view: 'payroll', icon: DollarSign },
-      { label: 'Expenses', view: 'expenses', icon: DollarSign, badge: '2' },
-    ],
-  },
-  {
-    title: 'Company',
-    items: [
-      { label: 'Notifications', view: 'notifications', icon: Bell },
-      { label: 'Reports', view: 'reports', icon: BarChart3 },
-      { label: 'Audit trail', view: 'audit', icon: Shield },
-      { label: 'Settings', view: 'settings', icon: Settings },
-    ],
-  },
+{
+title: 'Overview',
+items: [{ label: 'Overview', view: 'overview', icon: LayoutDashboard }],
+},
+{
+title: 'People',
+items: [
+{ label: 'Employees', view: 'employees', icon: Users },
+{ label: 'Branches & departments', view: 'branches', icon: Building2 },
+{ label: 'Documents & contracts', view: 'documents', icon: FileText },
+],
+},
+{
+title: 'Time & attendance',
+items: [
+{ label: 'Attendance', view: 'attendance', icon: Clock },
+{ label: 'Schedules & shifts', view: 'schedules', icon: Calendar },
+{ label: 'Leave', view: 'leave', icon: Calendar, badge: '3' },
+],
+},
+{
+title: 'Employee development',
+items: [
+{ label: 'Performance', view: 'performance', icon: BarChart3 },
+],
+},
+{
+title: 'Payroll',
+items: [
+{ label: 'Payroll', view: 'payroll', icon: DollarSign },
+],
+},
+{
+title: 'Administration',
+items: [
+{ label: 'Notifications', view: 'notifications', icon: Bell },
+{ label: 'Reports', view: 'reports', icon: BarChart3 },
+{ label: 'Audit trail', view: 'audit', icon: Shield },
+{ label: 'Settings', view: 'settings', icon: Settings },
+],
+},
 ];
 
 export default function Sidebar({ activeView, onSelectView }) {

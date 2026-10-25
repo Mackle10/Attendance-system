@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronLeft, MessageSquare, RefreshCw, Pencil } from 'lucide-react';
+import { employeeService } from '@services/employeeService';
 
 /* ─── Tabs ────────────────────────────────────────────────── */
 const TABS = ['Overview', 'Employment & contract', 'Attendance', 'Schedule', 'Leave', 'Pay & payslips', 'Documents', 'Performance', 'Activity'];
@@ -43,8 +44,20 @@ export default function EmployeeProfile({
   onPageChange,
 }) {
   const [activeTab, setActiveTab] = useState('Overview');
+  const [isEditing, setIsEditing] = useState(false);
+const [editMessage, setEditMessage] = useState('');
 
   // Sarah Namutebi is the default matching Image 3
+  const [editForm, setEditForm] = useState({
+fullName: '',
+email: '',
+phone: '',
+position: '',
+department: '',
+branch: '',
+type: '',
+});
+
   const emp = employee || {
     initials: 'SN',
     name: 'Sarah Namutebi',
@@ -56,6 +69,14 @@ export default function EmployeeProfile({
     phone: '0756 907 214',
     email: 'sarah.n@nilefresh.co.ug',
   };
+  const handleEditChange = (event) => {
+  const { name, value } = event.target;
+
+  setEditForm((previous) => ({
+    ...previous,
+    [name]: value,
+  }));
+};
 
   return (
     <div className="min-w-0 flex-1 bg-[#f8f7f4]">
@@ -125,11 +146,58 @@ export default function EmployeeProfile({
                 Reset app login
               </button>
               <button
-                type="button"
-                className="rounded-xl bg-[#0b1329] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800"
-              >
-                Edit profile
-              </button>
+type="button"
+onClick={() => {
+  setEditForm({
+    fullName: emp.name || '',
+    email: emp.email || '',
+    phone: emp.phone || '',
+    position: emp.position || '',
+    department: emp.department || '',
+    branch: emp.branch || '',
+    type: emp.type || '',
+  });
+
+  setEditMessage('');
+  setIsEditing(true);
+}}
+className="rounded-xl bg-[#0b1329] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800"
+
+>
+
+  <Pencil size={14} className="mr-1 inline-block" />
+  Edit profile
+</button>
+<button
+  type="button"
+  onClick={async () => {
+    const confirmed = window.confirm(
+      `Are you sure you want to permanently delete ${emp.name}? This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await employeeService.delete(emp.id);
+
+      alert('Employee deleted successfully.');
+
+      onBack();
+    } catch (error) {
+      console.error('Failed to delete employee:', error);
+
+      alert(
+        error.code === 'permission-denied'
+          ? 'You do not have permission to delete employees.'
+          : 'Failed to delete employee. Please try again.'
+      );
+    }
+  }}
+  className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+>
+  Delete employee
+</button>
+
             </div>
           </div>
 
@@ -154,6 +222,177 @@ export default function EmployeeProfile({
         </div>
 
         {/* ── Overview tab content grid (Matching Image 3) ── */}
+        {isEditing && (
+
+  <div className="mb-6 rounded-2xl border border-[#ede9e2] bg-white p-6 shadow-sm">
+    <h2 className="mb-5 text-lg font-bold text-slate-900">
+      Edit employee profile
+    </h2>
+
+```
+<form
+  onSubmit={async (event) => {
+    event.preventDefault();
+
+    try {
+      setEditMessage('');
+
+      if (!employee?.id) {
+        setEditMessage('Cannot update employee: employee ID is missing.');
+        return;
+      }
+
+      await employeeService.update(employee.id, {
+        fullName: editForm.fullName.trim(),
+        email: editForm.email.trim(),
+        phone: editForm.phone.trim(),
+        position: editForm.position.trim(),
+        department: editForm.department.trim(),
+        branch: editForm.branch.trim(),
+        type: editForm.type,
+      });
+
+      setEditMessage('Employee profile updated successfully!');
+      setIsEditing(false);
+
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to update employee:', error);
+
+      setEditMessage(
+        error.code === 'permission-denied'
+          ? 'Permission denied. Please sign in with an administrator account.'
+          : 'Could not update employee. Please try again.'
+      );
+    }
+  }}
+  className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+>
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      Full name
+    </label>
+    <input
+      name="fullName"
+      value={editForm.fullName}
+      onChange={handleEditChange}
+      required
+      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
+    />
+  </div>
+
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      Email
+    </label>
+    <input
+      type="email"
+      name="email"
+      value={editForm.email}
+      onChange={handleEditChange}
+      required
+      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
+    />
+  </div>
+
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      Phone number
+    </label>
+    <input
+      name="phone"
+      value={editForm.phone}
+      onChange={handleEditChange}
+      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
+    />
+  </div>
+
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      Position
+    </label>
+    <input
+      name="position"
+      value={editForm.position}
+      onChange={handleEditChange}
+      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
+    />
+  </div>
+
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      Department
+    </label>
+    <input
+      name="department"
+      value={editForm.department}
+      onChange={handleEditChange}
+      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
+    />
+  </div>
+
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      Branch
+    </label>
+    <input
+      name="branch"
+      value={editForm.branch}
+      onChange={handleEditChange}
+      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
+    />
+  </div>
+
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      Employment type
+    </label>
+    <select
+      name="type"
+      value={editForm.type}
+      onChange={handleEditChange}
+      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
+    >
+      <option value="">Select employment type</option>
+      <option value="Permanent">Permanent</option>
+      <option value="Contract">Contract</option>
+      <option value="Part-time">Part-time</option>
+      <option value="Temporary">Temporary</option>
+      <option value="Intern">Intern</option>
+    </select>
+  </div>
+
+  <div className="flex flex-wrap items-end gap-3 sm:col-span-2">
+    <button
+      type="submit"
+      className="rounded-lg bg-[#0b1329] px-5 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+    >
+      Save changes
+    </button>
+
+    <button
+      type="button"
+      onClick={() => {
+        setIsEditing(false);
+        setEditMessage('');
+      }}
+      className="rounded-lg border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+    >
+      Cancel
+    </button>
+  </div>
+
+  {editMessage && (
+    <p className="text-sm sm:col-span-2" role="status">
+      {editMessage}
+    </p>
+  )}
+</form>
+```
+
+  </div>
+)}
+
         {activeTab === 'Overview' && (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 

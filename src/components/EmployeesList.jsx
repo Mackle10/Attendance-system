@@ -55,6 +55,11 @@ const [activeTab, setActiveTab] = useState('Active');
 const [checked, setChecked] = useState([]);
 const [searchQuery, setSearchQuery] = useState('');
 
+const [selectedBranch, setSelectedBranch] = useState('All');
+const [selectedDepartment, setSelectedDepartment] = useState('All');
+const [selectedType, setSelectedType] = useState('All');
+
+
 const [employees, setEmployees] = useState([]);
 const tabs = [
   {
@@ -101,28 +106,50 @@ useEffect(() => {
     setChecked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
 const filteredEmployees = employees.filter((emp) => {
-  const name = emp.fullName || emp.name || '';
-  const employeeNumber = emp.employeeNumber || '';
-  const phone = emp.phone || '';
-  const position = emp.position || '';
-  const department = emp.department || '';
+const name = emp.fullName || emp.name || '';
+const employeeNumber = emp.employeeNumber || '';
+const phone = emp.phone || '';
+const email = emp.email || '';
+const position = emp.position || '';
+const department = emp.department || '';
+const branch = emp.branch || '';
+const type = emp.type || '';
 
-  const matchesSearch = [
-    name,
-    employeeNumber,
-    emp.id,
-    phone,
-    position,
-    department,
-  ].some((value) =>
-    String(value).toLowerCase().includes(searchQuery.toLowerCase())
-  );
+const matchesSearch = [
+name,
+employeeNumber,
+emp.id,
+phone,
+email,
+position,
+department,
+branch,
+type,
+].some((value) =>
+String(value).toLowerCase().includes(searchQuery.trim().toLowerCase())
+);
 
-  const matchesStatus =
-    activeTab === 'All' || (emp.status || 'Active') === activeTab;
+const matchesStatus =
+activeTab === 'All' || (emp.status || 'Active') === activeTab;
 
-  return matchesSearch && matchesStatus;
+const matchesBranch =
+selectedBranch === 'All' || branch === selectedBranch;
+
+const matchesDepartment =
+selectedDepartment === 'All' || department === selectedDepartment;
+
+const matchesType =
+selectedType === 'All' || type === selectedType;
+
+return (
+matchesSearch &&
+matchesStatus &&
+matchesBranch &&
+matchesDepartment &&
+matchesType
+);
 });
+
 
   return (
     <div className="min-w-0 flex-1 bg-[#f8f7f4]">
@@ -162,60 +189,103 @@ const filteredEmployees = employees.filter((emp) => {
           </div>
         </div>
 
-        {/* ── Search + filter controls row ─────────────────── */}
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[280px]">
-            {/* Search */}
-            <div className="relative min-w-[200px] max-w-xs flex-1">
-              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Name, ID or phone"
-                className="w-full rounded-xl border border-[#e2ddd5] bg-white py-2 pl-9 pr-3 text-xs text-slate-800 placeholder-slate-400 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-900/5 shadow-sm"
-              />
-            </div>
+{/* ── Search + filter controls row ─────────────────── */}
 
-            {/* Dropdown filters */}
-            {['Branch', 'Department', 'Type'].map((label) => (
-              <button
-                key={label}
-                type="button"
-                className="flex items-center gap-1.5 rounded-xl border border-[#e2ddd5] bg-white px-3.5 py-2 text-xs font-medium text-slate-600 shadow-sm transition hover:bg-slate-50"
-              >
-                <span className="text-slate-400">{label}</span>
-                <span className="font-bold text-slate-800">All</span>
-                <ChevronDown size={12} className="text-slate-400" />
-              </button>
-            ))}
-          </div>
+<div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+  <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[280px]">
+    {/* Search */}
+    <div className="relative min-w-[200px] max-w-xs flex-1">
+      <Search
+        size={14}
+        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+      />
+      <input
+        type="search"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Name, ID or phone"
+        className="w-full rounded-xl border border-[#e2ddd5] bg-white py-2 pl-9 pr-3 text-xs text-slate-800 placeholder-slate-400 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-900/5 shadow-sm"
+      />
+    </div>
 
-          {/* Status pill tabs */}
-          <div className="flex items-center gap-1.5 rounded-xl border border-[#e2ddd5] bg-[#f2eee7] p-1">
-            {tabs.map((tab) => {
-              const isSelected = activeTab === tab.label;
-              return (
-                <button
-                  key={tab.label}
-                  type="button"
-                  onClick={() => setActiveTab(tab.label)}
-                  className={
-                    'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ' +
-                    (isSelected
-                      ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900')
-                  }
-                >
-                  <span>{tab.label}</span>
-                  <span className={isSelected ? 'text-slate-800 font-bold' : 'text-slate-500 font-medium'}>
-                    {tab.count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+{/* Dropdown filters */}
+{[
+  {
+    label: 'Branch',
+    value: selectedBranch,
+    setter: setSelectedBranch,
+    options: [...new Set(employees.map((emp) => emp.branch).filter(Boolean))],
+  },
+  {
+    label: 'Department',
+    value: selectedDepartment,
+    setter: setSelectedDepartment,
+    options: [...new Set(employees.map((emp) => emp.department).filter(Boolean))],
+  },
+  {
+    label: 'Type',
+    value: selectedType,
+    setter: setSelectedType,
+    options: [...new Set(employees.map((emp) => emp.type).filter(Boolean))],
+  },
+].map((filter) => (
+  <div key={filter.label} className="relative">
+    <select
+      aria-label={`Filter by ${filter.label.toLowerCase()}`}
+      value={filter.value}
+      onChange={(event) => filter.setter(event.target.value)}
+      className="rounded-xl border border-[#e2ddd5] bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm outline-none transition focus:border-slate-400"
+    >
+      <option value="All">All {filter.label}s</option>
+      {filter.options
+        .sort((a, b) => String(a).localeCompare(String(b)))
+        .map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+    </select>
+  </div>
+))}
+
+  </div>
+
+{/* Status pill tabs */}
+
+  <div className="flex items-center gap-1.5 rounded-xl border border-[#e2ddd5] bg-[#f2eee7] p-1">
+    {tabs.map((tab) => {
+      const isSelected = activeTab === tab.label;
+
+
+  return (
+    <button
+      key={tab.label}
+      type="button"
+      onClick={() => setActiveTab(tab.label)}
+      className={
+        'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ' +
+        (isSelected
+          ? 'bg-white text-slate-900 shadow-sm'
+          : 'text-slate-600 hover:text-slate-900')
+      }
+    >
+      <span>{tab.label}</span>
+      <span
+        className={
+          isSelected
+            ? 'text-slate-800 font-bold'
+            : 'text-slate-500 font-medium'
+        }
+      >
+        {tab.count}
+      </span>
+    </button>
+  );
+})}
+
+
+  </div>
+</div>
 
         {/* ── Table container ──────────────────────────────── */}
         <div className="rounded-2xl border border-[#ede9e2] bg-white shadow-sm overflow-hidden">

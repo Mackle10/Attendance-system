@@ -4,6 +4,8 @@ getDocs,
 doc,
 getDoc,
 addDoc,
+updateDoc,
+deleteDoc,
 serverTimestamp,
 } from 'firebase/firestore';
 
@@ -14,12 +16,10 @@ export const employeeService = {
 async getAll() {
 const snapshot = await getDocs(collection(db, 'employees'));
 
-```
 return snapshot.docs.map((document) => ({
   id: document.id,
   ...document.data(),
 }));
-```
 
 },
 
@@ -28,7 +28,6 @@ async getById(employeeId) {
 const employeeRef = doc(db, 'employees', employeeId);
 const snapshot = await getDoc(employeeRef);
 
-```
 if (!snapshot.exists()) {
   return null;
 }
@@ -37,7 +36,6 @@ return {
   id: snapshot.id,
   ...snapshot.data(),
 };
-```
 
 },
 
@@ -48,12 +46,34 @@ const employeeRef = await addDoc(collection(db, 'employees'), {
 createdAt: serverTimestamp(),
 });
 
-```
 return {
   id: employeeRef.id,
   ...employeeData,
 };
-```
 
+},
+
+// Update an existing employee
+async update(employeeId, employeeData) {
+const employeeRef = doc(db, 'employees', employeeId);
+
+await updateDoc(employeeRef, {
+  ...employeeData,
+  updatedAt: serverTimestamp(),
+});
+
+return {
+  id: employeeId,
+  ...employeeData,
+};
+
+},
+// Delete an employee
+async delete(employeeId) {
+  const employeeRef = doc(db, 'employees', employeeId);
+
+  await deleteDoc(employeeRef);
+
+  return true;
 },
 };

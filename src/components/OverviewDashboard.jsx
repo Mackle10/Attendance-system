@@ -8,22 +8,8 @@ import {
 } from 'lucide-react';
 
 /* ─── Static data ─────────────────────────────────────────── */
-const clockIns = [
-  { time: '08:26', initials: 'RN', color: 'bg-blue-500',   name: 'Ruth Nabirye',    role: 'Human resources', branch: 'Kampala HQ',      method: 'Office device', status: 'late', lateMins: 26 },
-  { time: '08:21', initials: 'IK', color: 'bg-purple-500', name: 'Ivan Kizza',       role: 'Field sales',     branch: 'Wakiso route',    method: 'GPS',           status: 'late', lateMins: 21 },
-  { time: '08:14', initials: 'EA', color: 'bg-teal-500',   name: 'Esther Akello',   role: 'Finance',         branch: 'Kampala HQ',      method: 'Office device', status: 'late', lateMins: 14 },
-  { time: '08:02', initials: 'DM', color: 'bg-orange-500', name: 'David Mugisha',   role: 'Warehouse',       branch: 'Mukono Warehouse',method: 'QR code',       status: 'ontime' },
-  { time: '07:58', initials: 'SN', color: 'bg-green-500',  name: 'Sarah Namutebi', role: 'Sales',           branch: 'Ntinda Store',    method: 'QR code',       status: 'ontime' },
-  { time: '07:51', initials: 'JO', color: 'bg-red-500',    name: 'Joseph Okello',  role: 'Drivers',         branch: 'Entebbe Depot',   method: 'GPS',           status: 'ontime' },
-  { time: '07:44', initials: 'GA', color: 'bg-indigo-500', name: 'Grace Atim',     role: 'Warehouse',       branch: 'Mukono Warehouse',method: 'QR code',       status: 'ontime' },
-];
 
-const approvals = [
-  { name: 'Annet Nakato',       detail: 'Annual leave · 5-9 Oct · 5 days' },
-  { name: 'Brian Ssemwogerere', detail: 'Expense claim · Fuel · UGX 180,000' },
-  { name: 'Grace Atim',         detail: 'Salary advance · UGX 400,000' },
-  { name: 'Joseph Okello',      detail: 'Shift swap · Sat 3 Oct with P. Lubega' },
-];
+
 
 const branches = [
   { name: 'Kampala HQ',      onTime: 58, total: 64, pct: 91 },
@@ -57,8 +43,110 @@ function Badge({ status, mins }) {
 }
 
 /* ─── Main component ──────────────────────────────────────── */
-export default function OverviewDashboard({ onNavigateToEmployees }) {
+export default function OverviewDashboard({
+  employees = [],
+  attendanceRecords = [],
+  leaveRequests = [],
+  onNavigateToEmployees,
+}) {
   const [branch, setBranch] = useState('All branches');
+  const pendingApprovals = leaveRequests.filter(
+  (request) => request.status?.toLowerCase() === 'pending'
+);
+
+const approvals = pendingApprovals.map((request) => {
+  const employee = employees.find(
+    (item) => item.id === request.employeeId
+  );
+
+  const employeeName =
+    request.employeeName ||
+    employee?.fullName ||
+    employee?.name ||
+    'Unknown employee';
+
+  const leaveType = request.leaveType || request.type || 'Leave request';
+  const startDate = request.startDate || '';
+  const endDate = request.endDate || '';
+  const days = request.days;
+
+  const dateRange = startDate
+    ? startDate === endDate
+      ? startDate
+      : `${startDate} – ${endDate || 'Not specified'}`
+    : 'Dates not specified';
+
+  const duration = days
+    ? ` · ${days} day${Number(days) === 1 ? '' : 's'}`
+    : '';
+
+  return {
+    id: request.id,
+    name: employeeName,
+    detail: `${leaveType} · ${dateRange}${duration}`,
+  };
+});
+  const clockIns = attendanceRecords
+  .filter((record) => record.clockIn)
+  .sort(
+    (a, b) =>
+      new Date(b.clockIn).getTime() - new Date(a.clockIn).getTime()
+  )
+  .map((record) => {
+    const employee = employees.find(
+      (item) => item.id === record.employeeId
+    );
+
+    const employeeName =
+      record.employeeName ||
+      employee?.fullName ||
+      employee?.name ||
+      'Unknown employee';
+
+    const clockInDate = new Date(record.clockIn);
+
+    return {
+      id: record.id,
+      time: clockInDate.toLocaleTimeString('en-UG', {
+        timeZone: 'Africa/Kampala',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      }),
+      initials: employeeName
+        .split(' ')
+        .filter(Boolean)
+        .map((part) => part[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase(),
+      name: employeeName,
+      role: employee?.position || employee?.jobPosition || 'Employee',
+      branch: record.branch || employee?.branch || '—',
+      method: record.method || 'Not recorded',
+      status: 'ontime',
+      lateMins: 0,
+      clockOut: record.clockOut,
+    };
+  });
+  const totalEmployees = employees.length;
+
+const activeEmployees = employees.filter(
+  (employee) =>
+    String(employee.status || '').toLowerCase() === 'active'
+).length;
+
+const departmentCount = new Set(
+  employees
+    .map((employee) => employee.department?.trim())
+    .filter(Boolean)
+).size;
+
+const branchCount = new Set(
+  employees
+    .map((employee) => employee.branch?.trim())
+    .filter(Boolean)
+).size;
 
   return (
     <div className="min-w-0 flex-1 bg-[#f8f7f4]">
@@ -118,63 +206,93 @@ export default function OverviewDashboard({ onNavigateToEmployees }) {
 
       <div className="mx-auto max-w-[1440px] px-4 pb-12 pt-6 sm:px-6 xl:px-8">
 
-        {/* ── Stat cards row (4 cards) ───────────────────────── */}
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          
-          {/* Card 1: Present now (Navy Card) */}
-          <div className="flex flex-col justify-between rounded-2xl bg-[#0b1329] p-5 shadow-sm text-white min-h-[140px]">
-            <div>
-              <p className="text-xs font-medium text-slate-400">Present now</p>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-4xl font-extrabold tracking-tight sm:text-5xl">112</span>
-                <span className="text-xs text-slate-400 font-medium">of 138 scheduled</span>
-              </div>
-            </div>
-            {/* Underline bar: dark track with orange filled portion */}
-            <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
-              <div className="h-full rounded-full bg-[#e58c38]" style={{ width: '81%' }} />
-            </div>
-          </div>
+        {/* ── Employee statistics ───────────────────────────── */}
+<div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
-          {/* Card 2: Late today */}
-          <div className="flex flex-col justify-between rounded-2xl border border-[#ede9e2] bg-white p-5 shadow-sm min-h-[140px]">
-            <div>
-              <p className="text-xs font-medium text-slate-400">Late today</p>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-4xl font-extrabold text-[#965b2a] sm:text-5xl">9</span>
-                <span className="text-xs text-slate-400 font-medium">avg 18 min</span>
-              </div>
-            </div>
-            <p className="mt-3 text-xs text-slate-500 font-medium">Mukono Warehouse has 5 of them</p>
-          </div>
+  {/* Total employees */}
+  <div className="flex flex-col justify-between rounded-2xl bg-[#0b1329] p-5 shadow-sm text-white min-h-[140px]">
+    <div>
+      <p className="text-xs font-medium text-slate-400">
+        Total employees
+      </p>
 
-          {/* Card 3: Absent · On leave */}
-          <div className="flex flex-col justify-between rounded-2xl border border-[#ede9e2] bg-white p-5 shadow-sm min-h-[140px]">
-            <div>
-              <p className="text-xs font-medium text-slate-400">Absent · On leave</p>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-4xl font-extrabold text-slate-900 sm:text-5xl">10</span>
-                <span className="text-2xl font-bold text-slate-400">·</span>
-                <span className="text-4xl font-extrabold text-[#5b4a8e] sm:text-5xl">7</span>
-              </div>
-            </div>
-            <p className="mt-3 text-xs text-slate-500 font-medium">4 absences not yet explained</p>
-          </div>
+      <div className="mt-2 flex items-baseline gap-2">
+        <span className="text-4xl font-extrabold tracking-tight sm:text-5xl">
+          {totalEmployees}
+        </span>
 
-          {/* Card 4: September payroll · due Wed */}
-          <div className="flex flex-col justify-between rounded-2xl border border-[#ede9e2] bg-white p-5 shadow-sm min-h-[140px]">
-            <div>
-              <p className="text-xs font-medium text-slate-400">September payroll · due Wed</p>
-              <div className="mt-2 flex items-baseline gap-1.5">
-                <span className="text-sm font-semibold text-slate-500">UGX</span>
-                <span className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">48.26M</span>
-              </div>
-            </div>
-            <p className="mt-3 text-xs font-semibold text-[#b45309]">
-              Draft · 3 exceptions to resolve
-            </p>
-          </div>
-        </div>
+        <span className="text-xs text-slate-400 font-medium">
+          Registered employees
+        </span>
+      </div>
+    </div>
+
+    <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
+      <div
+        className="h-full rounded-full bg-[#e58c38]"
+        style={{ width: totalEmployees > 0 ? '100%' : '0%' }}
+      />
+    </div>
+  </div>
+
+  {/* Active employees */}
+  <div className="flex flex-col justify-between rounded-2xl border border-[#ede9e2] bg-white p-5 shadow-sm min-h-[140px]">
+    <div>
+      <p className="text-xs font-medium text-slate-400">
+        Active employees
+      </p>
+
+      <div className="mt-2 flex items-baseline gap-2">
+        <span className="text-4xl font-extrabold text-[#965b2a] sm:text-5xl">
+          {activeEmployees}
+        </span>
+      </div>
+    </div>
+
+    <p className="mt-3 text-xs text-slate-500 font-medium">
+      Employees with Active status
+    </p>
+  </div>
+
+  {/* Departments */}
+  <div className="flex flex-col justify-between rounded-2xl border border-[#ede9e2] bg-white p-5 shadow-sm min-h-[140px]">
+    <div>
+      <p className="text-xs font-medium text-slate-400">
+        Departments
+      </p>
+
+      <div className="mt-2 flex items-baseline gap-2">
+        <span className="text-4xl font-extrabold text-slate-900 sm:text-5xl">
+          {departmentCount}
+        </span>
+      </div>
+    </div>
+
+    <p className="mt-3 text-xs text-slate-500 font-medium">
+      Different departments
+    </p>
+  </div>
+
+  {/* Branches */}
+  <div className="flex flex-col justify-between rounded-2xl border border-[#ede9e2] bg-white p-5 shadow-sm min-h-[140px]">
+    <div>
+      <p className="text-xs font-medium text-slate-400">
+        Branches
+      </p>
+
+      <div className="mt-2 flex items-baseline gap-1.5">
+        <span className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+          {branchCount}
+        </span>
+      </div>
+    </div>
+
+    <p className="mt-3 text-xs font-semibold text-slate-500">
+      Different branches
+    </p>
+  </div>
+
+</div>
 
         {/* ── Two-column content area ───────────────────────── */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_380px]">
@@ -206,7 +324,7 @@ export default function OverviewDashboard({ onNavigateToEmployees }) {
                 <tbody className="divide-y divide-[#f5f2eb]">
                   {clockIns.map((row) => (
                     <tr
-                      key={row.time + row.name}
+                      key={row.id}
                       onClick={() => onNavigateToEmployees && onNavigateToEmployees(row.name)}
                       className="cursor-pointer transition hover:bg-slate-50/70"
                     >
@@ -244,7 +362,7 @@ export default function OverviewDashboard({ onNavigateToEmployees }) {
               <div className="flex items-center justify-between border-b border-[#f0ece5] px-5 py-4">
                 <h2 className="text-base font-bold text-slate-900">Needs your approval</h2>
                 <span className="text-xs font-semibold text-blue-600">
-                  6 pending ·{' '}
+                  {pendingApprovals.length} pending ·{' '}
                   <button type="button" className="underline underline-offset-2 transition hover:text-blue-700">
                     view all
                   </button>
@@ -252,29 +370,51 @@ export default function OverviewDashboard({ onNavigateToEmployees }) {
               </div>
 
               <ul className="divide-y divide-[#f5f2eb]">
-                {approvals.map((item) => (
-                  <li key={item.name} className="flex items-center gap-3 px-5 py-3.5">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold text-slate-800">{item.name}</p>
-                      <p className="text-[11px] text-slate-400">{item.detail}</p>
-                    </div>
-                    <div className="flex shrink-0 gap-1.5">
-                      <button
-                        type="button"
-                        className="rounded-lg border border-[#e2ddd5] bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-700 transition hover:bg-slate-50"
-                      >
-                        Decline
-                      </button>
-                      <button
-                        type="button"
-                        className="rounded-lg bg-[#0b1329] px-3.5 py-1.5 text-[11px] font-semibold text-white transition hover:bg-slate-800"
-                      >
-                        Approve
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+  {approvals.length === 0 ? (
+    <li className="px-5 py-8 text-center">
+      <p className="text-sm font-semibold text-slate-700">
+        No pending leave requests
+      </p>
+      <p className="mt-1 text-xs text-slate-400">
+        New requests will appear here when submitted.
+      </p>
+    </li>
+  ) : (
+    approvals.map((item) => (
+      <li
+        key={item.id}
+        className="flex items-center gap-3 px-5 py-3.5"
+      >
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold text-slate-800">
+            {item.name}
+          </p>
+          <p className="text-[11px] text-slate-400">
+            {item.detail}
+          </p>
+        </div>
+
+        <div className="flex shrink-0 gap-1.5">
+          <button
+            type="button"
+            className="rounded-lg border border-[#e2ddd5] bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            Decline
+          </button>
+
+          <button
+            type="button"
+            className="rounded-lg bg-[#0b1329] px-3.5 py-1.5 text-[11px] font-semibold text-white transition hover:bg-slate-800"
+          >
+            Approve
+          </button>
+        </div>
+      </li>
+    ))
+  )}
+</ul>
+                    
+                    
             </div>
 
             {/* Attendance by branch */}

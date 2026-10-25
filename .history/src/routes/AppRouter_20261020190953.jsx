@@ -10,7 +10,7 @@ import RegisterPage from '@pages/Auth/RegisterPage'
 import ForgotPasswordPage from '@pages/Auth/ForgotPasswordPage'
 
 // App Pages
-import DashboardPage from '@pages/Dashboard/DashboardPage'
+
 import OverviewPage from '@pages/Overview/OverviewPage'
 import EmployeesPage from '@pages/Employees/EmployeesPage'
 import AddEmployeePage from '@pages/Employees/AddEmployeePage'
@@ -40,7 +40,7 @@ function ProtectedRoute({ children }) {
  */
 function PublicRoute({ children }) {
   const { isAuthenticated } = useAuth()
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : children
+  return isAuthenticated ? <Navigate to="/overview" replace /> : children
 }
 
 export default function AppRouter() {
@@ -74,8 +74,8 @@ export default function AppRouter() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard"    element={<DashboardPage />} />
+        <Route index element={<Navigate to="/overview" replace />} />
+        <Route path="dashboard" element={<Navigate to="/overview" replace />} />
         <Route path="overview"     element={<OverviewPage />} />
         <Route path="employees"    element={<EmployeesPage />} />
         <Route path="employees/new"          element={<AddEmployeePage />} />
