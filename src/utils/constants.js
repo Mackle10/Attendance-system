@@ -92,7 +92,7 @@ id: 'time',
 label: 'TIME & ATTENDANCE',
 items: [
 { id: 'attendance', label: 'Attendance', path: '/attendance', icon: 'clock' },
-{ id: 'schedules', label: 'Schedules & shifts', icon: 'schedule' },
+{ id: 'schedules', label: 'Schedules & shifts', path: '/schedules', icon: 'schedule' },
 { id: 'leave', label: 'Leave', path: '/leave', icon: 'calendar', badge: 3 },
 ],
 },

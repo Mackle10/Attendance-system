@@ -57,6 +57,7 @@ export default function PerformancePage() {
   const [showReviewForm, setShowReviewForm] = useState(false);
 const [savingReview, setSavingReview] = useState(false);
 const [reviewError, setReviewError] = useState('');
+const [editingReview, setEditingReview] = useState(null)
 
 const [reviewForm, setReviewForm] = useState({
   employeeId: '',
@@ -181,20 +182,31 @@ const handleSaveReview = async (status) => {
         0
       ) / Object.values(ratings).length;
 
-    await performanceService.create({
-      employeeId: selectedEmployee.id,
-      employeeName: getEmployeeName(selectedEmployee),
-      employeeDepartment: getEmployeeDepartment(selectedEmployee),
-      period: reviewForm.period,
-      reviewDate: reviewForm.reviewDate,
-      ratings,
-      overallScore: Number(overallScore.toFixed(1)),
-      strengths: reviewForm.strengths.trim(),
-      areasForImprovement: reviewForm.improvements.trim(),
-      managerComments: reviewForm.managerComments.trim(),
-      goals: reviewForm.goals.trim(),
-      status,
-    });
+    const reviewData = {
+  employeeId: selectedEmployee.id,
+  employeeName: getEmployeeName(selectedEmployee),
+  employeeDepartment: getEmployeeDepartment(selectedEmployee),
+  period: reviewForm.period,
+  reviewDate: reviewForm.reviewDate,
+  ratings,
+  overallScore: Number(overallScore.toFixed(1)),
+  strengths: reviewForm.strengths.trim(),
+  areasForImprovement: reviewForm.improvements.trim(),
+  managerComments: reviewForm.managerComments.trim(),
+  goals: reviewForm.goals.trim(),
+  status,
+};
+
+if (editingReview) {
+  // Update the existing review
+  await performanceService.update(editingReview.id, reviewData);
+} else {
+  // Create a new review
+  await performanceService.create(reviewData);
+}
+
+await loadReviews();
+setEditingReview(null);
 
     setShowReviewForm(false);
 
@@ -233,6 +245,19 @@ const handleSaveReview = async (status) => {
 const completedReviews = reviews.filter(
   (review) => review.status === 'Completed'
 ).length
+const employeeReviewHistory = selectedReview
+  ? reviews
+      .filter(
+        (review) =>
+          review.employeeId === selectedReview.employeeId &&
+          review.id !== selectedReview.id
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.reviewDate || 0) -
+          new Date(a.reviewDate || 0)
+      )
+  : []
 
 const draftReviews = reviews.filter(
   (review) => review.status === 'Draft'
@@ -288,6 +313,7 @@ const averagePerformanceScore = (() => {
       type="button"
       onClick={() => {
   setReviewError('');
+  setEditingReview(selectedReview);
   setShowReviewForm(true);
 }}
       className={styles.newReviewBtn}
@@ -1013,6 +1039,50 @@ const averagePerformanceScore = (() => {
             <strong>
               {selectedReview.employeeName || 'Not specified'}
             </strong>
+            
+<div className={styles.reviewHistorySection}>
+  <h3>Previous Reviews</h3>
+
+  {employeeReviewHistory.length === 0 ? (
+    <p className={styles.reviewHistoryEmpty}>
+      No previous reviews are available for this employee.
+    </p>
+  ) : (
+    <div className={styles.reviewHistoryList}>
+      {employeeReviewHistory.map((review) => (
+        <div
+          key={review.id}
+          className={styles.reviewHistoryItem}
+        >
+          <div className={styles.reviewHistoryInfo}>
+            <strong>{review.period || 'Performance Review'}</strong>
+
+            <span>
+              {review.reviewDate || 'No date recorded'}
+            </span>
+
+            <span>{review.status || 'Draft'}</span>
+          </div>
+
+          <div className={styles.reviewHistoryScore}>
+            {typeof review.overallScore === 'number'
+              ? `${review.overallScore.toFixed(1)}/5`
+              : 'No score'}
+          </div>
+
+          <button
+            type="button"
+            className={styles.profileLink}
+            onClick={() => setSelectedReview(review)}
+          >
+            View
+            <ChevronRight size={15} />
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
           </div>
 
           <div className={styles.reviewDetailGroup}>
