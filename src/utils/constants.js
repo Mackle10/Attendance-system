@@ -107,7 +107,7 @@ items: [
 id: 'administration',
 label: 'ADMINISTRATION',
 items: [
-{ id: 'notifications', label: 'Notifications', icon: 'bell' },
+{ id: 'notifications', label: 'Notifications', path: '/notifications', icon: 'bell' },
 { id: 'reports', label: 'Reports', path: '/reports', icon: 'chart' },
 { id: 'settings', label: 'Settings', path: '/settings', icon: 'settings' },
 ],

@@ -1,0 +1,117 @@
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { useAuth } from '@hooks/useAuth'
+
+// Layouts
+import AppShell from '@components/layout/AppShell'
+
+// Auth Pages
+import LoginPage from '@pages/Auth/LoginPage'
+import RegisterPage from '@pages/Auth/RegisterPage'
+import ForgotPasswordPage from '@pages/Auth/ForgotPasswordPage'
+
+// App Pages
+import OverviewPage from '@pages/Overview/OverviewPage'
+import EmployeesPage from '@pages/Employees/EmployeesPage'
+import AddEmployeePage from '@pages/Employees/AddEmployeePage'
+import EmployeeProfilePage from '@pages/Employees/EmployeeProfilePage'
+import BranchesPage from '@pages/Branches/BranchesPage'
+import DocumentsPage from '@pages/Documents/DocumentsPage'
+import AttendancePage from '@pages/Attendance/AttendancePage'
+import SchedulesPage from '@pages/Schedules/SchedulesPage'
+import NotificationsPage from '@pages/Notifications/NotificationsPage'
+import LeavePage from '@pages/Leave/LeavePage'
+import TasksPage from '@pages/Tasks/TasksPage'
+import PerformancePage from '@pages/Performance/PerformancePage'
+import PayrollPage from '@pages/Payroll/PayrollPage'
+import ReportsPage from '@pages/Reports/ReportsPage'
+import SettingsPage from '@pages/Settings/SettingsPage'
+import NotFoundPage from '@pages/NotFound/NotFoundPage'
+
+/**
+ * ProtectedRoute – redirects unauthenticated users to /login
+ */
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, isLoading } = useAuth()
+  if (isLoading) return null
+  return isAuthenticated ? children : <Navigate to="/login" replace />
+}
+
+function AdminRoute({ children }) {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) return null;
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user.role !== 'admin') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+}
+/**
+ * PublicRoute – redirects authenticated users away from auth pages
+ */
+function PublicRoute({ children }) {
+  const { isAuthenticated } = useAuth()
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : children
+}
+
+export default function AppRouter() {
+  return (
+    <Routes>
+      {/* ── Public Routes (Auth) ───────────────────── */}
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <RegisterPage />
+          </PublicRoute>
+        }
+      />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+      {/* ── Protected Routes (App Shell) ──────────── */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <AppShell />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="/overview" replace />} />
+
+<Route path="dashboard" element={<Navigate to="/overview" replace />} />
+        <Route path="overview"     element={<OverviewPage />} />
+        <Route path="employees" element={ <AdminRoute> <EmployeesPage /> </AdminRoute> } />
+        <Route path="employees/new"          element={<AddEmployeePage />} />
+        <Route path="employees/:employeeId"  element={<EmployeeProfilePage />} />
+        <Route path="branches" element={ <AdminRoute> <BranchesPage /> </AdminRoute> } />
+        <Route path="documents"    element={<DocumentsPage />} />
+        <Route path="attendance"   element={<AttendancePage />} />
+        <Route path="schedules"    element={<SchedulesPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="leave"        element={<LeavePage />} />
+        <Route path="tasks"        element={<TasksPage />} />
+        <Route path="performance"  element={<PerformancePage />} />
+        <Route path="payroll" element={ <AdminRoute> <PayrollPage /> </AdminRoute> } />
+        <Route path="reports" element={ <AdminRoute> <ReportsPage /> </AdminRoute> } />
+        <Route path="settings"   element={<SettingsPage />} />
+      </Route>
+
+      {/* ── 404 ───────────────────────────────────── */}
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  )
+}

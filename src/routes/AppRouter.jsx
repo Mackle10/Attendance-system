@@ -18,6 +18,7 @@ import BranchesPage from '@pages/Branches/BranchesPage'
 import DocumentsPage from '@pages/Documents/DocumentsPage'
 import AttendancePage from '@pages/Attendance/AttendancePage'
 import SchedulesPage from '@pages/Schedules/SchedulesPage'
+import NotificationsPage from '@pages/Notifications/NotificationsPage'
 import LeavePage from '@pages/Leave/LeavePage'
 import TasksPage from '@pages/Tasks/TasksPage'
 import PerformancePage from '@pages/Performance/PerformancePage'
@@ -100,6 +101,7 @@ export default function AppRouter() {
         <Route path="documents"    element={<DocumentsPage />} />
         <Route path="attendance"   element={<AttendancePage />} />
         <Route path="schedules"    element={<SchedulesPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         <Route path="leave"        element={<LeavePage />} />
         <Route path="tasks"        element={<TasksPage />} />
         <Route path="performance"  element={<PerformancePage />} />

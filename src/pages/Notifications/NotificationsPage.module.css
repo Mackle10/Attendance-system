@@ -1,0 +1,175 @@
+.page {
+display: flex;
+flex-direction: column;
+gap: 24px;
+padding: 28px;
+color: #172033;
+}
+
+.header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 20px;
+}
+
+.header h1 {
+margin: 0;
+font-size: 28px;
+font-weight: 700;
+letter-spacing: -0.5px;
+}
+
+.header p {
+margin: 8px 0 0;
+color: #667085;
+font-size: 14px;
+}
+
+.markAllButton {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+padding: 11px 16px;
+border: 1px solid #dce2ea;
+border-radius: 9px;
+background: #ffffff;
+color: #344054;
+font-size: 13px;
+font-weight: 600;
+cursor: pointer;
+transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.markAllButton:hover {
+background: #f8fafc;
+border-color: #b8c3d1;
+}
+
+.summary {
+display: grid;
+grid-template-columns: repeat(2, minmax(0, 1fr));
+gap: 18px;
+}
+
+.summaryCard {
+display: flex;
+align-items: center;
+gap: 16px;
+padding: 22px;
+border: 1px solid #e6eaf0;
+border-radius: 12px;
+background: #ffffff;
+box-shadow: 0 2px 5px rgb(16 24 40 / 3%);
+}
+
+.summaryCard > svg {
+flex-shrink: 0;
+padding: 11px;
+box-sizing: content-box;
+border-radius: 10px;
+background: #eef4ff;
+color: #3159b8;
+}
+
+.summaryCard span {
+display: block;
+margin-bottom: 6px;
+color: #667085;
+font-size: 13px;
+}
+
+.summaryCard h2 {
+margin: 0;
+font-size: 26px;
+font-weight: 700;
+}
+
+.notificationsCard {
+overflow: hidden;
+border: 1px solid #e6eaf0;
+border-radius: 12px;
+background: #ffffff;
+box-shadow: 0 2px 5px rgb(16 24 40 / 3%);
+}
+
+.cardHeader {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 12px;
+padding: 20px 22px;
+border-bottom: 1px solid #edf0f4;
+}
+
+.cardHeader h2 {
+margin: 0;
+font-size: 16px;
+font-weight: 700;
+}
+
+.cardHeader span {
+color: #667085;
+font-size: 12px;
+}
+
+.emptyState {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+padding: 64px 24px;
+text-align: center;
+}
+
+.emptyIcon {
+display: flex;
+align-items: center;
+justify-content: center;
+width: 60px;
+height: 60px;
+margin-bottom: 18px;
+border-radius: 50%;
+background: #f0f4ff;
+color: #3159b8;
+}
+
+.emptyState h3 {
+margin: 0 0 10px;
+font-size: 17px;
+font-weight: 650;
+}
+
+.emptyState p {
+max-width: 440px;
+margin: 0;
+color: #667085;
+font-size: 14px;
+line-height: 1.7;
+}
+
+@media (max-width: 768px) {
+.page {
+padding: 18px;
+gap: 18px;
+}
+
+.header {
+align-items: flex-start;
+flex-direction: column;
+}
+
+.summary {
+grid-template-columns: 1fr;
+}
+
+.cardHeader {
+align-items: flex-start;
+flex-direction: column;
+}
+
+.emptyState {
+padding: 44px 20px;
+}
+}
