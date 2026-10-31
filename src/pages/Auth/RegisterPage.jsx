@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   UserRound,
   Mail,
@@ -12,12 +11,16 @@ import {
 import {
   createUserWithEmailAndPassword,
   updateProfile,
+  sendEmailVerification,
 } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '@services/firebase';
+
+import { auth } from '@services/firebase';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const invitationId = searchParams.get('invitationId');
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -28,65 +31,63 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
-    setError('');
+  event.preventDefault();
+  setError('');
 
-    if (!name.trim() || !email.trim() || !password || !confirmPassword) {
-      setError('Please fill in all the fields.');
-      return;
+  if (!invitationId) {
+    setError(
+      'You need a valid employee invitation to create an account.'
+    );
+    return;
+  }
+
+  if (!name.trim() || !email.trim() || !password || !confirmPassword) {
+    setError('Please fill in all the fields.');
+    return;
+  }
+
+  if (password.length < 6) {
+    setError('Your password must contain at least 6 characters.');
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    setError('Your passwords do not match.');
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const result = await createUserWithEmailAndPassword(
+      auth,
+      email.trim().toLowerCase(),
+      password
+    );
+
+    await updateProfile(result.user, {
+      displayName: name.trim(),
+    });
+
+    await sendEmailVerification(result.user);
+
+    navigate('/login', { replace: true });
+  } catch (err) {
+    console.error('Registration failed:', err);
+
+    if (err.code === 'auth/email-already-in-use') {
+      setError('An account with this email already exists.');
+    } else if (err.code === 'auth/invalid-email') {
+      setError('Please enter a valid email address.');
+    } else if (err.code === 'auth/weak-password') {
+      setError('Please choose a stronger password.');
+    } else {
+      setError(err.message || 'Unable to create your account.');
     }
-
-    if (password.length < 6) {
-      setError('Your password must contain at least 6 characters.');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Your passwords do not match.');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const result = await createUserWithEmailAndPassword(
-        auth,
-        email.trim(),
-        password
-      );
-
-      await updateProfile(result.user, {
-        displayName: name.trim(),
-      });
-
-      await setDoc(doc(db, 'users', result.user.uid), {
-        name: name.trim(),
-        email: email.trim(),
-        role: 'employee',
-        createdAt: serverTimestamp(),
-      });
-
-      navigate('/dashboard', { replace: true });
-    } catch (err) {
-      console.error('Registration failed:', err);
-
-      if (err.code === 'auth/email-already-in-use') {
-        setError('An account with this email already exists.');
-      } else if (err.code === 'auth/invalid-email') {
-        setError('Please enter a valid email address.');
-      } else if (err.code === 'auth/weak-password') {
-        setError('Please choose a stronger password.');
-      } else if (err.code === 'permission-denied') {
-        setError(
-          'Your account was created, but saving your profile was blocked by database permissions. Contact the administrator.'
-        );
-      } else {
-        setError(err.message || 'Unable to create your account.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-white">
